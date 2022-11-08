@@ -477,7 +477,7 @@ lean_fp<-df_forest %>%
   scale_color_manual(values=c("#00A1D5", "black")) +
   scale_size_continuous(range=c(2, 4)) +
   scale_shape_manual(values=c(20, 18)) +
-  scale_x_continuous(expand = expansion(mult = c(.05, .3)),
+  scale_x_continuous(expand = expansion(mult = c(.05, .4)),
                       breaks = seq(-1, .5, .25)) +
   coord_cartesian(clip="off") +
   guides(color="none", size="none", shape="none") +
