@@ -53,7 +53,8 @@ compI2 <- function(res) {
 
 ## Data
 
-n3data <- read_excel(here("Data/n3PUFA-data.xlsx")) # place the spreadsheet into the location of the script or R project
+n3data <- read_excel(here("Data/n3PUFA-data.xlsx")) |># place the spreadsheet into the location of the script or R project
+  mutate(authoryear = paste(author, " ", "(", refnumber, ")", sep="")) 
 n3data <- n3data[order(n3data$doseclassification, n3data$year),] # reordering for later when we make forest plots
 
 # inverting values for function tests where less is better
@@ -471,6 +472,7 @@ lean_fp<-df_forest %>%
   geom_errorbar(size=.3, width=.25) +
   geom_point(aes(color=factor(type))) +  
   geom_text(aes(x=Inf, label=result), hjust = 1, size=2.95, color="black") +
+  annotate("text", x=Inf, y=13, label="SMD [95% CI]", hjust=1, vjust=-4.95, size=3) +
   theme_classic() +
   scale_color_manual(values=c("#00A1D5", "black")) +
   scale_size_continuous(range=c(2, 4)) +
@@ -480,10 +482,11 @@ lean_fp<-df_forest %>%
   coord_cartesian(clip="off") +
   guides(color="none", size="none", shape="none") +
   labs(x=NULL, y=NULL) +
-  theme(text = element_text(size = 11),
+    theme(text = element_text(size = 11),
           panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(),
-          axis.text = element_text(color="black"))
+          axis.text = element_text(color="black"),
+          plot.margin = unit(c(18, 5.5, 5.5, 5.5), "pt"))
 )
 
 (
@@ -544,7 +547,7 @@ fp_all <- (lean_fp / str_fp / func_fp)
 
 fp_all
 
-# ggsave(here("Figures/all_fp.png"), units="in", width=6, height=11, dpi=600, type="cairo")
+# ggsave(here("Figures/Figure3_Forestplot.png"), units="in", width=6, height=11, dpi=600, type="cairo")
 
 ## Publication bias and small-study effects
 
@@ -604,7 +607,7 @@ ggplot(aes(x = sqrt(vi_2), y=yi_2), data=n3data) +
             aes(x=Inf, y=Inf, label=value), hjust=1.96, vjust=-0.4, fontface="italic") +
   scale_color_jama(labels=c("Muscle mass", "Function", "Strength"))
 
-# ggsave(here("Figures/funnel_all.png"), units="in", width=7, height=5, dpi=600, type="cairo")
+# ggsave(here("Figures/Figure2_Funnelplot.png"), units="in", width=7, height=5, dpi=600, type="cairo")
 
 ### Supplementary material
 
@@ -661,15 +664,11 @@ meta_func_sens <- rma.mv(yi_sens,
                     test = "t", 
                     method = "REML")
 
-# plot for visualization
-
 sens_cor_df <- reduce(list(tidy(meta_lean_mass_sens, conf.int=TRUE),
             tidy(meta_str_sens, conf.int=TRUE),
             tidy(meta_func_sens, conf.int=TRUE)), full_join) |> 
   mutate(meta_type = rep(c("Muscle mass", "Strength", "Function")),
          meta_type = fct_relevel(meta_type, "Muscle mass", "Strength", "Function"))
-
-# ggsave(here("Figures/sensitivity_correlation.png"), units="in", width=7, height=7, dpi=600, type="cairo")
 
 # making a table with results 
 
